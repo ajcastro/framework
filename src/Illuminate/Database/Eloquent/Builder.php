@@ -96,7 +96,6 @@ class Builder
      * @var array
      */
     protected static $knownPivotAccessors = [
-        'pivot',
     ];
 
     /**
@@ -617,7 +616,7 @@ class Builder
      * @param  string  $name
      * @return boolean
      */
-    protected function isPivotAccessor($name)
+    public function isPivotAccessor($name)
     {
         return in_array($name, static::$knownPivotAccessors);
     }

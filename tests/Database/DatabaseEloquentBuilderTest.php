@@ -14,11 +14,13 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Grammars\Grammar;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Query\Processors\Processor;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Database\Query\Builder as BaseBuilder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 
 class DatabaseEloquentBuilderTest extends TestCase
@@ -472,6 +474,27 @@ class DatabaseEloquentBuilderTest extends TestCase
         $this->assertEquals(['models.matched'], $results);
         $this->assertEquals($relation, $_SERVER['__eloquent.constrain']);
         unset($_SERVER['__eloquent.constrain']);
+    }
+
+    public function testEagerLoadPivotRelationsShouldRememberPivotAsPivotAccessor()
+    {
+        $model = m::mock(new EloquentBuilderTestStub);
+        $relation = m::mock(BelongsToMany::class);
+        $model->shouldReceive('items')->atLeast()->times(1)->andReturn($relation);
+        $builder = new Builder(m::mock(BaseBuilder::class));
+        $builder->shouldReceive('from')->with('stub');
+        $builder->setModel($model);
+        $builder->with(['items.pivot']);
+        $models = [(new EloquentBuilderTestStub)];
+
+        $builder->eagerLoadRelations($models);
+        $this->assertTrue($builder->isPivotAccessor('pivot'));
+        // dd($builder->getEagerLoads());
+        // dd($builder->isPivotAccessor('pivot'));
+        // $builder->
+        // $builder->shouldReceive('getRelation')->once()->with('items')->andReturn($relation);
+
+        // $this->assertTrue($builder->isPivotAccessor('pivot'));
     }
 
     public function testGetRelationProperlySetsNestedRelationships()
