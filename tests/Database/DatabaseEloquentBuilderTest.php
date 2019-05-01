@@ -481,13 +481,19 @@ class DatabaseEloquentBuilderTest extends TestCase
         $model = m::mock(new EloquentBuilderTestStub);
         $relation = m::mock(BelongsToMany::class);
         $model->shouldReceive('items')->atLeast()->times(1)->andReturn($relation);
-        $builder = new Builder(m::mock(BaseBuilder::class));
-        $builder->shouldReceive('from')->with('stub');
+        $query = m::mock(BaseBuilder::class);
+        $query->shouldReceive('from')->with('table');
+        $builder = m::mock(new Builder($query));
         $builder->setModel($model);
-        $builder->with(['items.pivot']);
-        $models = [(new EloquentBuilderTestStub)];
+        $builder->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('eagerLoadRelation')
+            ->with(['models'], 'items', function () {})
+            ->andReturn(['models'])
+            ->once();
 
-        $builder->eagerLoadRelations($models);
+        $builder->with(['items.pivot']);
+
+        $builder->eagerLoadRelations(['models']);
         $this->assertTrue($builder->isPivotAccessor('pivot'));
         // dd($builder->getEagerLoads());
         // dd($builder->isPivotAccessor('pivot'));
