@@ -406,6 +406,20 @@ if (! function_exists('dispatch_now')) {
     }
 }
 
+if (! function_exists('dispatch_chain')) {
+    /**
+     * Dispatch a chain of jobs to its appropriate handler.
+     *
+     * @param  array  $jobs
+     * @return \Illuminate\Foundation\Bus\PendingDispatch
+     */
+    function dispatch_chain(array $jobs)
+    {
+        $first = array_shift($jobs);
+        return dispatch($first)->chain($jobs);
+    }
+}
+
 if (! function_exists('elixir')) {
     /**
      * Get the path to a versioned Elixir file.
